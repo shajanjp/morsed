@@ -3,19 +3,24 @@ body {
   height: 100%;
   padding: 0px;
   margin: 0px;
+  background: #5bc0eb;
+  -webkit-transition: background 1s ease-in-out;
+  -o-transition: background 1s ease-in-out;
+  transition: background 1s ease-in-out;
 }
 
-.success{
- background: green;
+.success {
+  background: #9bc53d;
 }
 
-.error{
-  background: red;
+.error {
+  background: #e55934;
 }
 
 #morse-text {
   position: absolute;
   top: 50%;
+  color: rgba(255,255,255,0.7);
   text-align: center;
   font-family: Ubuntu;
   font-size: 3em;
