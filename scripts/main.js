@@ -98,6 +98,7 @@ function getRandom(max) {
 }
 
 function showRandomCharacter() {
+  charBuffer = '';
   bodyElement.classList.remove('error');
   bodyElement.classList.remove('success');
   let charSelected = charSet[getRandom(charSet.length)];
