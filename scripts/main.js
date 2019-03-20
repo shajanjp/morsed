@@ -4,7 +4,6 @@ var isTrue = true;
 var charBuffer = '';
 var mouseDownTime;
 var mouseUpTime;
-
 var charSet = [
   'A',
   'B',
@@ -83,6 +82,28 @@ var morseDataSet = {
   MC9: '11110',
 };
 
+const newAudioContext = new AudioContext();
+
+function beep(vol, freq, duration) {
+  let v = newAudioContext.createOscillator();
+  let u = newAudioContext.createGain();
+  v.connect(u);
+  v.frequency.value = freq;
+  v.type = 'square';
+  u.connect(newAudioContext.destination);
+  u.gain.value = vol * 0.01;
+  v.start(newAudioContext.currentTime);
+  v.stop(newAudioContext.currentTime + duration * 0.001);
+}
+
+function playDit() {
+  beep(50, 500, 100);
+}
+
+function playDah() {
+  beep(50, 500, 300);
+}
+
 function itsError() {
   bodyElement.classList.remove('success');
   bodyElement.classList.add('error');
@@ -130,15 +151,16 @@ function validateMorse(mc) {
   bodyElement.addEventListener("mousedown", function(){
     mouseDownTime = Date.now();
   });
-
-  bodyElement.addEventListener("mouseup", function(){
-    mouseUpTime = Date.now();
-    if((mouseUpTime - mouseDownTime) < 100){
-      validateMorse("0")
-    } else {
-      validateMorse("1")
-    };
-  });
+bodyElement.addEventListener('mouseup', function() {
+  mouseUpTime = Date.now();
+  if (mouseUpTime - mouseDownTime < 100) {
+    validateMorse('0');
+    playDit();
+  } else {
+    validateMorse('1');
+    playDah();
+  }
+});
 
   setTimeout(function(){
     showRandomCharacter();
