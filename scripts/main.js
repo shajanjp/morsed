@@ -2,6 +2,9 @@ var morseTextContainer = document.getElementById('morse-text');
 var bodyElement = document.getElementById('main');
 var isTrue = true;
 var charBuffer = '';
+var mouseDownTime;
+var mouseUpTime;
+
 var charSet = [
   'A',
   'B',
@@ -95,7 +98,7 @@ function getRandom(max) {
 }
 
 function showRandomCharacter() {
-    bodyElement.classList.remove('error');
+  bodyElement.classList.remove('error');
   bodyElement.classList.remove('success');
   let charSelected = charSet[getRandom(charSet.length)];
   morseTextContainer.setAttribute('data-text', charSelected);
@@ -119,18 +122,22 @@ function validateMorse(mc) {
   }
 }
 
-function myKeyPress(e) {
-  var keynum;
-  if (window.event) {
-    keynum = e.keyCode;
-  } else if (e.which) {
-    keynum = e.which;
-  }
-  validateMorse(String.fromCharCode(keynum));
-}
 
 (function() {
+  bodyElement.addEventListener("mousedown", function(){
+    mouseDownTime = Date.now();
+  });
+
+  bodyElement.addEventListener("mouseup", function(){
+    mouseUpTime = Date.now();
+    if((mouseUpTime - mouseDownTime) < 100){
+      validateMorse("0")
+    } else {
+      validateMorse("1")
+    };
+  });
+
   setTimeout(function(){
-  showRandomCharacter();
+    showRandomCharacter();
   }, 3000)
 })();
