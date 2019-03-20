@@ -82,7 +82,7 @@ var morseDataSet = {
   MC9: '11110',
 };
 
-const newAudioContext = new AudioContext();
+var newAudioContext = new AudioContext();
 
 function beep(vol, freq, duration) {
   let v = newAudioContext.createOscillator();
