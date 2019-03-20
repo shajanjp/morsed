@@ -115,9 +115,11 @@ function validateMorse(mc) {
     charBuffer = '';
     setTimeout(function(){
       showRandomCharacter();
-    },3000);
+    },1000);
   } else {
-    itsError();
+    if(charBuffer.length >= morseDataSet[`MC${mcc}`].length){
+      itsError();
+    }
     console.log('not yet');
   }
 }
