@@ -147,22 +147,54 @@ function validateMorse(mc) {
 }
 
 
+var keyDownTime;
+var keyUpTime;
+var isKeyPressed = false;
+
 (function() {
   bodyElement.addEventListener("mousedown", function(){
     mouseDownTime = Date.now();
   });
-bodyElement.addEventListener('mouseup', function() {
-  mouseUpTime = Date.now();
-  if (mouseUpTime - mouseDownTime < 100) {
-    validateMorse('0');
-    playDit();
-  } else {
-    validateMorse('1');
-    playDah();
-  }
-});
+  bodyElement.addEventListener('mouseup', function() {
+    mouseUpTime = Date.now();
+    if (mouseUpTime - mouseDownTime < 100) {
+      validateMorse('0');
+      playDit();
+    } else {
+      validateMorse('1');
+      playDah();
+    }
+  });
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      if (!isKeyPressed) {
+        keyDownTime = Date.now();
+        isKeyPressed = true;
+      }
+    }
+  });
+
+  window.addEventListener('keyup', function(e) {
+    if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      if (isKeyPressed) {
+        keyUpTime = Date.now();
+        if (keyUpTime - keyDownTime < 100) {
+          validateMorse('0');
+          playDit();
+        } else {
+          validateMorse('1');
+          playDah();
+        }
+        isKeyPressed = false;
+      }
+    }
+  });
 
   setTimeout(function(){
+    document.getElementById("instruction").innerHTML = "";
     showRandomCharacter();
   }, 3000)
 })();
