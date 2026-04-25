@@ -1,43 +1,50 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans");
 
 body {
-  width: 100%;
-  height: 100%;
-  padding: 0px;
-  margin: 0px;
-  background: #5bc0eb;
-  -webkit-transition: background 1s ease-in-out;
-  -o-transition: background 1s ease-in-out;
-  transition: background 1s ease-in-out;
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
+    background: #5bc0eb;
+    -webkit-transition: background 1s ease-in-out;
+    -o-transition: background 1s ease-in-out;
+    transition: background 1s ease-in-out;
 }
 
 .success {
-  background: #9bc53d;
+    background: #9bc53d;
 }
 
 .error {
-  background: #e55934;
+    background: #e55934;
 }
 
 #main {
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
 }
 
 #main span {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 4em;
-  color: rgba(255, 255, 255, 0.7);
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+    font-family: "Open Sans", sans-serif;
+    font-size: 8em;
+    color: rgba(255, 255, 255, 0.7);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #main #instruction {
-  font-size: 2em;
+    font-size: 4em;
+    min-height: 1.2em;
+}
+
+#morse-text,
+#morse-sequence {
+    min-height: 1.2em;
 }
