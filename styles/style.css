@@ -19,32 +19,40 @@ body {
     background: #e55934;
 }
 
+#instruction-container {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+#instruction {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.5em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 #main {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
 }
 
 #main span {
-    font-family: "Open Sans", sans-serif;
-    font-size: 8em;
-    color: rgba(255, 255, 255, 0.7);
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 8em;
+  color: rgba(255, 255, 255, 0.7);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-#main #instruction {
-    font-size: 4em;
-    min-height: 1.2em;
+#morse-text, #morse-sequence {
+  min-height: 1.2em;
 }
-
-#morse-text,
-#morse-sequence {
-    min-height: 1.2em;
 }
