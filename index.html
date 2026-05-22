@@ -2,21 +2,108 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Morsed</title>
-        <meta name="theme-color" content="#5bc0eb" />
+        <title>morsed</title>
+        <meta name="description" content="Practice Morse code with real words and sentences" />
+        <meta name="theme-color" content="#111" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⎍</text></svg>" />
         <link rel="stylesheet" href="styles/style.css" />
     </head>
     <body>
-        <div id="instruction-container">
-            <span id="instruction"
-                >Mouse: short/long. Keyboard: '.' for dot, Space for dash</span
-            >
+        <!-- ── Top bar ─────────────────────────────────────── -->
+        <header id="top">
+            <div id="logo">morsed</div>
+            <div id="stats">
+                <div class="stat" id="stat-timer">
+                    <span class="stat-value" id="timer-value">0s</span>
+                    <span class="stat-label">time</span>
+                </div>
+                <div class="stat" id="stat-cpm">
+                    <span class="stat-value" id="cpm-value">0</span>
+                    <span class="stat-label">cpm</span>
+                </div>
+                <div class="stat" id="stat-accuracy">
+                    <span class="stat-value" id="accuracy-value">100</span>
+                    <span class="stat-label">%</span>
+                </div>
+                <div class="stat" id="stat-streak">
+                    <span class="stat-value" id="streak-value">0</span>
+                    <span class="stat-label">streak</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── Main typing area ────────────────────────────── -->
+        <main id="main">
+            <!-- Word track (line of words) -->
+            <div id="word-track-container">
+                <div id="word-track"></div>
+            </div>
+
+            <!-- Character track within current word -->
+            <div id="char-track-container">
+                <div id="char-track"></div>
+            </div>
+
+            <!-- Current character + Morse input -->
+            <div id="input-area">
+                <div id="current-character">
+                    <span id="char-display"></span>
+                    <span id="cursor">|</span>
+                </div>
+                <div id="morse-output">
+                    <span id="morse-chars"></span>
+                </div>
+            </div>
+
+            <!-- Subtle hints -->
+            <div id="hints">
+                <span class="hint-key">.</span> dit &middot;
+                <span class="hint-key">⎵</span> dah
+            </div>
+        </main>
+
+        <!-- ── Results overlay ─────────────────────────────── -->
+        <div id="results" class="hidden">
+            <div id="results-grid">
+                <div class="result-stat">
+                    <span class="result-value" id="result-cpm">0</span>
+                    <span class="result-label">chars / min</span>
+                </div>
+                <div class="result-stat">
+                    <span class="result-value" id="result-accuracy">100</span>
+                    <span class="result-label">accuracy</span>
+                </div>
+                <div class="result-stat">
+                    <span class="result-value" id="result-time">0s</span>
+                    <span class="result-label">time</span>
+                </div>
+                <div class="result-stat">
+                    <span class="result-value" id="result-chars">0</span>
+                    <span class="result-label">chars</span>
+                </div>
+                <div class="result-stat">
+                    <span class="result-value" id="result-words">0</span>
+                    <span class="result-label">words</span>
+                </div>
+                <div class="result-stat">
+                    <span class="result-value" id="result-streak-max">0</span>
+                    <span class="result-label">best streak</span>
+                </div>
+            </div>
+
+            <div id="result-sentence">
+                <span id="result-sentence-text"></span>
+            </div>
+
+            <button id="restart-btn">next &rarr;</button>
         </div>
-        <div id="main">
-            <span id="morse-text"></span>
-            <span id="morse-sequence"></span>
+
+        <!-- ── History bar ─────────────────────────────────── -->
+        <div id="history-bar">
+            <div id="history-list"></div>
         </div>
+
         <script src="scripts/main.js"></script>
     </body>
 </html>
