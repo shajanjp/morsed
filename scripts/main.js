@@ -65,7 +65,11 @@ const MORSE = {
 };
 
 /* ── Session config ───────────────────────────────────────────── */
-const WORDS_PER_SESSION = 14;
+const WORDS_BATCH = 30;
+const TIMER_OPTIONS = [30, 60, 180];
+
+/* ── Active timer mode ───────────────────────────────────────── */
+let activeTimerMode = 30;
 
 /* ── State ─────────────────────────────────────────────────────── */
 const S = {
@@ -76,6 +80,12 @@ const S = {
   charBuffer:      "",        // Morse buffer for current char
   started:         false,
   finished:        false,
+
+  // Timer
+  timeLimit:       30,
+  cpmHistory:      [],        // CPM sampled each second
+  charsAtSecond:   [0],       // Cumulative chars at each second boundary
+  elapsedSeconds:  0,
 
   // Stats
   startTime:       0,
@@ -125,7 +135,10 @@ const DOM = {
   resultWords:  $("#result-words"),
   resultStreak: $("#result-streak-max"),
   resultSentence:$("#result-sentence-text"),
+  resultChart:  $("#result-chart"),
   restartBtn:   $("#restart-btn"),
+  timerBtns:    document.querySelectorAll(".timer-btn"),
+  main:         $("#main"),
 
   historyList:  $("#history-list"),
 };
@@ -161,15 +174,22 @@ function playDah() { beep(50, 650, 280); }
  *  Picks words to form a "sentence-like" sequence. Mixes lengths
  *  for natural variety.
  * ────────────────────────────────────────────────────────────────── */
-function generateWords() {
+function generateWords(count) {
   const words = [];
-  // Pick a mix: ~30% short, ~50% medium, ~20% long
-  for (let i = 0; i < WORDS_PER_SESSION; i++) {
+  for (let i = 0; i < count; i++) {
     const r = Math.random();
     const pool = r < 0.3 ? WORDS.short : r < 0.8 ? WORDS.medium : WORDS.long;
     words.push(pick(pool));
   }
   return words;
+}
+
+function ensureWords() {
+  // If fewer than 10 words remain ahead, generate another batch
+  const ahead = S.words.length - S.wordIndex;
+  if (ahead < 10) {
+    S.words = S.words.concat(generateWords(WORDS_BATCH));
+  }
 }
 
 /* ── Render word track ─────────────────────────────────────────── */
@@ -242,7 +262,7 @@ function flashMorse(type) {
 function updateStats() {
   if (!S.started || S.finished) {
     if (!S.finished) {
-      DOM.timerVal.textContent = "0s";
+      DOM.timerVal.textContent = `${S.timeLimit}s`;
       DOM.cpmVal.textContent = "0";
     }
     DOM.accuracyVal.textContent = S.totalKeyStrokes === 0
@@ -252,7 +272,8 @@ function updateStats() {
   }
 
   const elapsed = (Date.now() - S.startTime) / 1000;
-  const secs = Math.floor(elapsed);
+  const remaining = Math.max(0, S.timeLimit - elapsed);
+  const secs = Math.ceil(remaining);
   DOM.timerVal.textContent = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m ${secs % 60}s`;
 
   const minutes = elapsed / 60;
@@ -264,15 +285,40 @@ function updateStats() {
   DOM.streakVal.textContent = S.streak;
 }
 
+function handleTimerTick() {
+  const elapsed = (Date.now() - S.startTime) / 1000;
+  S.elapsedSeconds = Math.floor(elapsed);
+
+  // Record CPM at this second
+  const minutes = elapsed / 60;
+  const charsDone = S.results.length;
+  S.charsAtSecond[S.elapsedSeconds] = charsDone;
+  S.cpmHistory[S.elapsedSeconds] = minutes > 0 ? Math.round(charsDone / minutes) : charsDone;
+
+  // Check if time's up
+  if (elapsed >= S.timeLimit) {
+    finishSession();
+    return;
+  }
+
+  updateStats();
+}
+
 function startTimer() {
   S.startTime = Date.now();
-  S._timerInterval = setInterval(updateStats, 200);
+  S.elapsedSeconds = 0;
+  S.cpmHistory = [];
+  S.charsAtSecond = [0];
+  S._timerInterval = setInterval(handleTimerTick, 200);
 }
 
 /* ── Advance to next character ─────────────────────────────────── */
 function advanceChar() {
   const ch = currentChar();
-  S.results.push({ wordIdx: S.wordIndex, charIdx: S.charIndex, char: ch, correct: true });
+  const result = { wordIdx: S.wordIndex, charIdx: S.charIndex, char: ch, correct: true };
+  S.results.push(result);
+  // Keep result cache in sync so renderChars sees green immediately
+  if (S._resultMap) S._resultMap[`${S.wordIndex}-${S.charIndex}`] = result;
   S.correctChars++;
   S.streak++;
   if (S.streak > S.maxStreak) S.maxStreak = S.streak;
@@ -290,6 +336,7 @@ function advanceChar() {
   if (S.charIndex >= S.words[S.wordIndex].length) {
     S.wordIndex++;
     S.charIndex = 0;
+    ensureWords();
   }
 
   renderWords();
@@ -297,8 +344,6 @@ function advanceChar() {
   updateCharDisplay();
   updateMorseOutput();
   updateStats();
-
-  if (S.wordIndex >= S.words.length) finishSession();
 }
 
 /* ── Main input handler ────────────────────────────────────────── */
@@ -353,22 +398,147 @@ function finishSession() {
   showResults();
 }
 
+/* ── Chart drawing ─────────────────────────────────────────────── */
+function drawChart() {
+  const canvas = DOM.resultChart;
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  const w = rect.width;
+  const h = rect.height;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 16, bottom: 22, left: 46, right: 16 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  const history = S.cpmHistory;
+  const maxSec = S.timeLimit;
+
+  if (!history || history.length < 2) {
+    ctx.fillStyle = "#333";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("not enough data", w / 2, h / 2 + 4);
+    return;
+  }
+
+  const maxVal = Math.max(...history, 10);
+  const yMax = Math.ceil(maxVal / 25) * 25 || 25;
+  const xMax = maxSec;
+
+  // ── helpers ──────────────────────────────────────────────
+  const toX = (s) => pad.left + (s / xMax) * plotW;
+  const toY = (v) => pad.top + plotH - (v / yMax) * plotH;
+
+  // ── grid lines ───────────────────────────────────────────
+  ctx.strokeStyle = "#1e1e1e";
+  ctx.lineWidth = 1;
+  for (let v = 0; v <= yMax; v += 25) {
+    const y = toY(v);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+  }
+  for (let s = 0; s <= xMax; s += Math.max(1, Math.floor(xMax / 6))) {
+    const x = toX(s);
+    ctx.beginPath();
+    ctx.moveTo(x, pad.top);
+    ctx.lineTo(x, h - pad.bottom);
+    ctx.stroke();
+  }
+
+  // ── axis labels ──────────────────────────────────────────
+  ctx.fillStyle = "#444";
+  ctx.font = "10px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for (let s = 0; s <= xMax; s += Math.max(1, Math.floor(xMax / 6))) {
+    ctx.fillText(`${s}s`, toX(s), h - pad.bottom + 6);
+  }
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (let v = 0; v <= yMax; v += 25) {
+    ctx.fillText(String(v), pad.left - 6, toY(v));
+  }
+
+  // ── data points ──────────────────────────────────────────
+  const pts = history
+    .map((cpm, i) => ({ x: toX(i), y: toY(cpm), cpm }))
+    .filter(p => p.cpm > 0);
+
+  if (pts.length < 2) {
+    ctx.fillStyle = "#333";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("not enough data", w / 2, h / 2 + 4);
+    return;
+  }
+
+  // ── fill gradient ────────────────────────────────────────
+  const grad = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
+  grad.addColorStop(0, "rgba(255, 210, 0, 0.18)");
+  grad.addColorStop(1, "rgba(255, 210, 0, 0.01)");
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pad.top + plotH);
+  for (const p of pts) ctx.lineTo(p.x, p.y);
+  ctx.lineTo(pts[pts.length - 1].x, pad.top + plotH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ── line ─────────────────────────────────────────────────
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const cx = (pts[i].x + pts[i - 1].x) / 2;
+    ctx.bezierCurveTo(cx, pts[i - 1].y, cx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle = "#ffd200";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // ── average line ─────────────────────────────────────────
+  const avgCpm = history.reduce((a, b) => a + b, 0) / history.length;
+  const avgY = toY(avgCpm);
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = "rgba(255, 210, 0, 0.3)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, avgY);
+  ctx.lineTo(w - pad.right, avgY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── dots on line ─────────────────────────────────────────
+  for (const p of pts) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffd200";
+    ctx.fill();
+  }
+}
+
 /* ── Results screen ────────────────────────────────────────────── */
 function showResults() {
-  const elapsed = S.startTime ? (Date.now() - S.startTime) / 1000 : 0;
+  const elapsed = S.startTime ? Math.min(Date.now() - S.startTime, S.timeLimit * 1000) / 1000 : S.timeLimit;
   const minutes = elapsed / 60 || 0.001;
   const totalChars = S.results.length;
-  // Use same accuracy metric as live view: correct chars ÷ total key strokes
   const accuracy = S.totalKeyStrokes > 0
     ? Math.round((S.correctChars / S.totalKeyStrokes) * 100) : 100;
 
   DOM.resultCpm.textContent     = Math.round(totalChars / minutes);
   DOM.resultAccuracy.textContent = accuracy;
-  DOM.resultTime.textContent    = elapsed < 60
+  DOM.resultTime.textContent    = Math.floor(elapsed) < 60
     ? `${Math.floor(elapsed)}s`
     : `${Math.floor(elapsed / 60)}m ${Math.floor(elapsed) % 60}s`;
   DOM.resultChars.textContent   = totalChars;
-  DOM.resultWords.textContent   = S.words.length;
+  DOM.resultWords.textContent   = S.wordIndex;  // words fully completed
   DOM.resultStreak.textContent  = S.maxStreak;
 
   // Show the sentence with per-word colouring
@@ -383,6 +553,9 @@ function showResults() {
   ).join(" ");
 
   DOM.results.classList.remove("hidden");
+
+  // Draw chart after a tiny delay to let the DOM settle
+  requestAnimationFrame(() => requestAnimationFrame(() => drawChart()));
 }
 
 /* ── History strip ─────────────────────────────────────────────── */
@@ -400,15 +573,32 @@ function addHistory(ch) {
   while (DOM.historyList.children.length > 20) DOM.historyList.lastChild.remove();
 }
 
+/* ── Timer button handlers ────────────────────────────────────── */
+function initTimerButtons() {
+  DOM.timerBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      DOM.timerBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTimerMode = parseInt(btn.dataset.time, 10);
+      // Reset session with new timer mode
+      if (S.finished || !S.started) startSession();
+    });
+  });
+}
+
 /* ── Start / restart ───────────────────────────────────────────── */
 function startSession() {
-  S.words = generateWords();
+  S.words = generateWords(WORDS_BATCH);
   S.wordIndex = 0;
   S.charIndex = 0;
   S.charBuffer = "";
   S.started = false;
   S.finished = false;
   S.startTime = 0;
+  S.timeLimit = activeTimerMode;
+  S.cpmHistory = [];
+  S.charsAtSecond = [0];
+  S.elapsedSeconds = 0;
   S.correctChars = 0;
   S.streak = 0;
   S.maxStreak = 0;
@@ -484,15 +674,16 @@ function onKeyUp(e) {
 
 /* ── Init ───────────────────────────────────────────────────────── */
 function init() {
-  DOM.body.addEventListener("pointerdown", onPointerDown);
-  DOM.body.addEventListener("pointerup", onPointerUp);
-  DOM.body.addEventListener("touchstart", e => {
-    if (e.target === DOM.body || e.target.closest("#main")) e.preventDefault();
+  DOM.main.addEventListener("pointerdown", onPointerDown);
+  DOM.main.addEventListener("pointerup", onPointerUp);
+  DOM.main.addEventListener("touchstart", e => {
+    e.preventDefault();
   }, { passive: false });
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   DOM.restartBtn.addEventListener("click", startSession);
+  initTimerButtons();
 
   startSession();
 }

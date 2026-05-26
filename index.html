@@ -12,10 +12,15 @@
     <body>
         <!-- ── Top bar ─────────────────────────────────────── -->
         <header id="top">
-            <div id="logo">morsed</div>
+            <div id="logo" class="clickable" onclick="startSession()">morsed</div>
+            <div id="timer-modes">
+                <button class="timer-btn active" data-time="30">30s</button>
+                <button class="timer-btn" data-time="60">1m</button>
+                <button class="timer-btn" data-time="180">3m</button>
+            </div>
             <div id="stats">
                 <div class="stat" id="stat-timer">
-                    <span class="stat-value" id="timer-value">0s</span>
+                    <span class="stat-value" id="timer-value">30s</span>
                     <span class="stat-label">time</span>
                 </div>
                 <div class="stat" id="stat-cpm">
@@ -90,6 +95,10 @@
                     <span class="result-value" id="result-streak-max">0</span>
                     <span class="result-label">best streak</span>
                 </div>
+            </div>
+
+            <div id="result-chart-container">
+                <canvas id="result-chart" width="700" height="200"></canvas>
             </div>
 
             <div id="result-sentence">
