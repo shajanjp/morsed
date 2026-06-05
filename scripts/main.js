@@ -105,6 +105,7 @@ const S = {
   // Audio
   audioCtx:        null,
   isKeyDown:       false,
+  muted:           false,
   _timerInterval:  null,
 };
 
@@ -139,8 +140,12 @@ const DOM = {
   restartBtn:   $("#restart-btn"),
   timerBtns:    document.querySelectorAll(".timer-btn"),
   main:         $("#main"),
+  inputArea:    $("#input-area"),
 
   historyList:  $("#history-list"),
+  btnDit:       $("#btn-dit"),
+  btnDah:       $("#btn-dah"),
+  muteBtn:      $("#mute-btn"),
 };
 
 /* ── Audio ─────────────────────────────────────────────────────── */
@@ -153,6 +158,7 @@ function unlockAudio() {
 }
 
 function beep(vol, freq, dur) {
+  if (S.muted) return;
   try {
     unlockAudio();
     if (!S.audioCtx) return;
@@ -628,14 +634,14 @@ function startSession() {
 /* ── Input: Pointer ────────────────────────────────────────────── */
 let _pointerDown = 0;
 
-function onPointerDown() {
-  if (S.finished) return;
+function onPointerDown(e) {
+  if (e.button !== 0 || S.finished) return;
   unlockAudio();
   _pointerDown = performance.now();
 }
 
-function onPointerUp() {
-  if (S.finished) return;
+function onPointerUp(e) {
+  if (e.button !== 0 || S.finished) return;
   const dt = performance.now() - _pointerDown;
   handleInput(dt < 120 ? "0" : "1");
 }
@@ -674,16 +680,44 @@ function onKeyUp(e) {
 
 /* ── Init ───────────────────────────────────────────────────────── */
 function init() {
-  DOM.main.addEventListener("pointerdown", onPointerDown);
-  DOM.main.addEventListener("pointerup", onPointerUp);
-  DOM.main.addEventListener("touchstart", e => {
+  DOM.inputArea.addEventListener("pointerdown", onPointerDown);
+  DOM.inputArea.addEventListener("pointerup", onPointerUp);
+  DOM.inputArea.addEventListener("touchstart", e => {
     e.preventDefault();
   }, { passive: false });
+  DOM.inputArea.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    if (S.finished) return;
+    unlockAudio();
+    handleInput("1");
+  });
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   DOM.restartBtn.addEventListener("click", startSession);
   initTimerButtons();
+
+  // Mobile dit / dah buttons
+  function onMorseBtn(e, symbol) {
+    e.preventDefault();
+    if (S.finished) return;
+    unlockAudio();
+    handleInput(symbol);
+  }
+
+  DOM.btnDit.addEventListener("pointerdown", e => onMorseBtn(e, "0"));
+  DOM.btnDah.addEventListener("pointerdown", e => onMorseBtn(e, "1"));
+
+  // Mute toggle
+  const iconUnmuted = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.807 4.29a1 1 0 0 0-1.415 1.415 8.913 8.913 0 0 1 0 12.59 1 1 0 0 0 1.415 1.415 10.916 10.916 0 0 0 0-15.42Z" fill="currentColor"/><path d="M18.1 7.291a1 1 0 0 0-1.42 1.415 4.662 4.662 0 0 1 0 6.588 1 1 0 0 0 1.42 1.415 6.666 6.666 0 0 0 0-9.418Z" fill="currentColor"/><path d="M13.82.2A12.054 12.054 0 0 0 6.266 5H5a5.008 5.008 0 0 0-5 5v4a5.008 5.008 0 0 0 5 5h1.266a12.059 12.059 0 0 0 7.554 4.8.917.917 0 0 0 .181.017 1 1 0 0 0 1-1V1.186A1 1 0 0 0 13.82.2ZM13 21.535a10.083 10.083 0 0 1-5.371-4.08A1 1 0 0 0 6.792 17H5a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3h1.8a1 1 0 0 0 .837-.453A10.079 10.079 0 0 1 13 2.465Z" fill="currentColor"/></svg>`;
+  const iconMuted = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.004 20.004v2.812a1.001 1.001 0 0 1-1.181.983c-2.999-.551-5.752-2.299-7.554-4.794h-1.27a5.008 5.008 0 0 1-5.001-5.003v-4.001c0-1.116.361-2.173 1.045-3.057a1.001 1.001 0 0 1 1.582 1.224A2.966 2.966 0 0 0 1.998 10v4.001A3.006 3.006 0 0 0 5 17.003h1.78c.321 0 .622.154.811.414l.3.415a10.142 10.142 0 0 0 5.113 3.703v-1.532a1 1 0 1 1 2 0Zm8.703 3.703a.997.997 0 0 1-1.414 0l-22-22A.999.999 0 1 1 1.707.293L6.33 4.916C8.131 2.468 10.855.753 13.822.205a1 1 0 0 1 1.181.984v12.402l1.686 1.686a4.717 4.717 0 0 0 1.31-3.276 4.718 4.718 0 0 0-1.392-3.359.999.999 0 1 1 1.414-1.414 6.707 6.707 0 0 1 1.978 4.773 6.706 6.706 0 0 1-1.896 4.69l1.415 1.415c3.33-3.418 3.304-8.908-.081-12.292A.999.999 0 1 1 20.851 4.4c4.164 4.164 4.191 10.922.081 15.12l2.774 2.774a.999.999 0 0 1 0 1.414ZM7.762 6.348l5.242 5.242V2.468A10.14 10.14 0 0 0 7.89 6.17l-.128.178Z" fill="currentColor"/></svg>`;
+
+  DOM.muteBtn.addEventListener("click", () => {
+    S.muted = !S.muted;
+    const icon = DOM.muteBtn.querySelector("svg");
+    icon.outerHTML = S.muted ? iconMuted : iconUnmuted;
+    DOM.muteBtn.title = S.muted ? "Unmute sounds" : "Mute sounds";
+  });
 
   startSession();
 }
