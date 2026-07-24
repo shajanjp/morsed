@@ -1,4 +1,10 @@
-/* ── Reset & Base ───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+ *  morsed — Monkeytype Dark Mono design system
+ *  Sparse, high-contrast, mono-spaced precision with restrained
+ *  amber accents.
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ── Reset & Base ─────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -15,93 +21,110 @@ html {
 
 body {
     min-height: 100%;
-    font-family: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono",
-                 "Consolas", monospace;
-    background: #111;
-    color: #aaa;
+    font-family: var(--font-mono);
+    background: var(--color-background);
+    color: var(--color-primary);
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Top bar ────────────────────────────────────────────────── */
+/* ── Top bar ──────────────────────────────────────────────────── */
 #top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     max-width: 900px;
-    padding: 1.5rem 2rem 0.5rem;
+    padding: var(--space-xl) var(--space-xl) var(--space-md);
     user-select: none;
+    gap: var(--space-gutter);
 }
 
 #logo {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #e2e2e2;
+    font-size: var(--fs-headline-sm);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
     letter-spacing: -0.02em;
+    line-height: var(--lh-tight);
+    transition: color 0.12s;
 }
 
 #logo.clickable { cursor: pointer; }
-#logo.clickable:hover { color: #fff; }
+#logo.clickable:hover,
+#logo.clickable:focus-visible { color: var(--color-inverse); }
 
-/* ── Timer mode buttons ──────────────────────────────── */
+/* ── Timer mode buttons (chip-style toggle group) ─────────────── */
 #timer-modes {
     display: flex;
-    gap: 0.25rem;
-    background: #181818;
-    border: 1px solid #222;
-    border-radius: 6px;
-    padding: 0.2rem;
+    gap: var(--space-xs);
+    background: var(--color-neutral);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
 }
 
 .timer-btn {
     font-family: inherit;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: var(--fs-label);
+    font-weight: var(--fw-bold);
     letter-spacing: 0.04em;
-    padding: 0.3rem 0.7rem;
+    text-transform: uppercase;
+    padding: var(--space-sm) var(--space-md);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: transparent;
-    color: #555;
+    color: var(--color-muted);
     cursor: pointer;
-    transition: color 0.12s, background 0.12s;
+    transition: color 0.12s, background 0.12s, border-color 0.12s;
     -webkit-tap-highlight-color: transparent;
+    line-height: var(--lh-tight);
+    min-height: 28px;
 }
 
-.timer-btn:hover { color: #aaa; }
+.timer-btn:hover { color: var(--color-secondary); }
 
 .timer-btn.active {
-    background: #e2e2e2;
-    color: #111;
+    background: var(--color-primary);
+    color: var(--color-neutral);
 }
 
-/* ── Mute button ──────────────────────────────────────── */
+.timer-btn:focus-visible {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ── Mute button ──────────────────────────────────────────────── */
 .mute-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem;
+    padding: var(--space-sm);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: transparent;
-    color: #aaa;
+    color: var(--color-muted);
     cursor: pointer;
-    transition: opacity 0.12s, color 0.12s;
+    transition: color 0.15s, opacity 0.15s;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     line-height: 0;
 }
 
-.mute-btn:hover { color: #e2e2e2; }
+.mute-btn:hover { color: var(--color-secondary); }
 
-.mute-btn:hover { opacity: 0.7; }
+.mute-btn:focus-visible {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 2px;
+}
 
+/* ── Stats ────────────────────────────────────────────────────── */
 #stats {
     display: flex;
-    gap: 1.25rem;
+    gap: var(--space-lg);
 }
 
 .stat {
@@ -112,20 +135,22 @@ body {
 }
 
 .stat-value {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #e2e2e2;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
     font-variant-numeric: tabular-nums;
+    line-height: var(--lh-tight);
 }
 
 .stat-label {
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #555;
+    color: var(--color-muted);
+    line-height: var(--lh-tight);
 }
 
-/* ── Main ───────────────────────────────────────────────────── */
+/* ── Main (expansive centered area) ───────────────────────────── */
 #main {
     display: flex;
     flex-direction: column;
@@ -134,11 +159,11 @@ body {
     flex: 1;
     width: 100%;
     max-width: 900px;
-    padding: 1rem 2rem;
-    gap: 1.25rem;
+    padding: var(--space-xl) var(--space-xl);
+    gap: var(--space-xl);
 }
 
-/* ── Word track (line of words) ─────────────────────────────── */
+/* ── Word track ───────────────────────────────────────────────── */
 #word-track-container {
     width: 100%;
     overflow: hidden;
@@ -149,33 +174,33 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 0.4rem;
-    line-height: 1.6;
-    font-size: 1.4rem;
-    font-weight: 500;
+    line-height: var(--lh-relaxed);
+    font-size: var(--fs-headline-sm);
+    font-weight: var(--fw-regular);
     user-select: none;
 }
 
 .word {
     padding: 0.1em 0.2em;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     white-space: nowrap;
     transition: color 0.1s;
 }
 
 .word.completed {
-    color: #555;
+    color: var(--color-tertiary);
 }
 
 .word.active {
-    color: #e2e2e2;
-    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-primary);
+    background: rgba(209, 208, 197, 0.04);
 }
 
 .word.pending {
-    color: #333;
+    color: var(--color-border);
 }
 
-/* ── Character track (within current word) ─────────────────── */
+/* ── Character track ──────────────────────────────────────────── */
 #char-track-container {
     width: 100%;
     overflow: hidden;
@@ -187,8 +212,8 @@ body {
     justify-content: center;
     gap: 0.6rem;
     line-height: 1.8;
-    font-size: 1.2rem;
-    font-weight: 500;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-regular);
     user-select: none;
     letter-spacing: 0.05em;
 }
@@ -199,33 +224,34 @@ body {
     justify-content: center;
     min-width: 1.4em;
     padding: 0 0.1em;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     transition: color 0.08s, background 0.08s;
 }
 
+/* Using accent for correct (Morse success) and error for mistakes */
 .char-tile.completed-correct {
-    color: #4caf50;
+    color: var(--color-accent);
 }
 
 .char-tile.completed-incorrect {
-    color: #c62828;
+    color: var(--color-error);
 }
 
 .char-tile.active {
-    color: #ffd200;
-    background: rgba(255, 210, 0, 0.08);
+    color: var(--color-accent);
+    background: rgba(226, 183, 20, 0.06);
 }
 
 .char-tile.pending {
-    color: #444;
+    color: var(--color-border);
 }
 
-/* ── Input area (current character + morse) ─────────────────── */
+/* ── Input area ───────────────────────────────────────────────── */
 #input-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
+    gap: var(--space-md);
     width: 100%;
 }
 
@@ -233,9 +259,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.05em;
-    font-size: 5rem;
-    font-weight: 700;
-    color: #e2e2e2;
+    font-size: var(--fs-display);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
     height: 1.3em;
     line-height: 1;
     user-select: none;
@@ -250,10 +276,10 @@ body {
     transform: scale(1.1);
 }
 
-/* ── Cursor ─────────────────────────────────────────────────── */
+/* ── Cursor (amber blink) ─────────────────────────────────────── */
 #cursor {
-    font-weight: 300;
-    color: #ffd200;
+    font-weight: var(--fw-regular);
+    color: var(--color-accent);
     animation: blink 1s step-end infinite;
     margin-left: 0.05em;
 }
@@ -263,7 +289,7 @@ body {
     50%      { opacity: 0; }
 }
 
-/* ── Morse output ───────────────────────────────────────────── */
+/* ── Morse output ─────────────────────────────────────────────── */
 #morse-output {
     min-height: 2.5rem;
     display: flex;
@@ -272,45 +298,46 @@ body {
 }
 
 #morse-chars {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: var(--fs-headline-md);
+    font-weight: var(--fw-regular);
     letter-spacing: 0.2em;
-    color: #e2e2e2;
+    color: var(--color-primary);
     min-height: 1.4em;
     transition: color 0.08s;
 }
 
 #morse-chars.dit-flash {
-    color: #4fc3f7;
+    color: var(--color-accent);
 }
 
 #morse-chars.dah-flash {
-    color: #ffd200;
+    color: var(--color-accent);
+    opacity: 0.7;
 }
 
 body.error #morse-chars {
-    color: #c62828;
+    color: var(--color-error);
 }
 
-/* ── Mobile dit / dah buttons ──────────────────────────── */
+/* ── Mobile dit / dah buttons ─────────────────────────────────── */
 #mobile-controls {
     display: none;
-    gap: 0.75rem;
+    gap: var(--space-md);
     width: 100%;
     max-width: 360px;
-    padding: 0.5rem 0;
+    padding: var(--space-sm) 0;
 }
 
 .morse-btn {
     flex: 1;
     font-family: inherit;
-    font-size: 2.2rem;
-    font-weight: 700;
-    padding: 1rem 0;
-    border: 2px solid #333;
-    border-radius: 12px;
-    background: #181818;
-    color: #e2e2e2;
+    font-size: 2rem;
+    font-weight: var(--fw-bold);
+    padding: var(--space-lg) 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-primary);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -323,41 +350,48 @@ body.error #morse-chars {
 }
 
 #btn-dit:active {
-    background: rgba(79, 195, 247, 0.15);
-    border-color: #4fc3f7;
+    background: rgba(226, 183, 20, 0.08);
+    border-color: var(--color-accent);
 }
 
 #btn-dah:active {
-    background: rgba(255, 210, 0, 0.15);
-    border-color: #ffd200;
+    background: rgba(226, 183, 20, 0.08);
+    border-color: var(--color-accent);
 }
 
-/* ── Hints ──────────────────────────────────────────────────── */
+/* ── Keyboard hints ───────────────────────────────────────────── */
 #hints {
-    font-size: 0.75rem;
-    color: #333;
+    font-size: var(--fs-body-sm);
+    color: var(--color-muted);
     user-select: none;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: var(--space-sm);
+    line-height: var(--lh-normal);
 }
 
 .hint-key {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.6em;
-    height: 1.6em;
-    padding: 0 0.3em;
-    border: 1px solid #222;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #555;
-    background: #181818;
+    min-width: 1.8em;
+    height: 1.8em;
+    padding: 0 0.35em;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-regular);
+    color: var(--color-tertiary);
+    background: var(--color-neutral);
+    line-height: var(--lh-tight);
 }
 
-/* ── Results overlay ────────────────────────────────────────── */
+.hint-sep {
+    color: var(--color-border);
+    margin: 0 var(--space-xs);
+}
+
+/* ── Results overlay (card-style dialog) ──────────────────────── */
 #results {
     position: fixed;
     inset: 0;
@@ -365,11 +399,11 @@ body.error #morse-chars {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #111;
+    background: var(--color-background);
     z-index: 100;
-    gap: 1.2rem;
+    gap: var(--space-xl);
     animation: fadeIn 0.25s ease;
-    padding: 2rem;
+    padding: var(--space-xl);
     overflow-y: auto;
 }
 
@@ -383,28 +417,32 @@ body.error #morse-chars {
 #results-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem 2.5rem;
+    gap: var(--space-md) var(--space-xl);
     text-align: center;
+    width: 100%;
+    max-width: 520px;
 }
 
 .result-stat {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: var(--space-xs);
 }
 
 .result-value {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #e2e2e2;
+    font-size: var(--fs-headline-lg);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
     font-variant-numeric: tabular-nums;
+    line-height: var(--lh-tight);
 }
 
 .result-label {
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #555;
+    color: var(--color-muted);
+    line-height: var(--lh-tight);
 }
 
 #result-chart-container {
@@ -417,71 +455,81 @@ body.error #morse-chars {
 #result-chart {
     width: 100%;
     height: 100%;
-    border-radius: 6px;
-    background: #141414;
+    border-radius: var(--radius-sm);
+    background: var(--color-neutral);
 }
 
 #result-sentence {
     text-align: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #555;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-regular);
+    color: var(--color-muted);
     max-width: 500px;
-    line-height: 1.5;
+    line-height: var(--lh-relaxed);
 }
 
-#result-sentence .word-correct { color: #4caf50; }
-#result-sentence .word-incorrect { color: #ef5350; }
+#result-sentence .word-correct { color: var(--color-accent); }
+#result-sentence .word-incorrect { color: var(--color-error); }
 
+/* ── Restart / next button (secondary style) ──────────────────── */
 #restart-btn {
-    padding: 0.6rem 2rem;
+    padding: var(--space-sm) var(--space-gutter);
     font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #e2e2e2;
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--color-primary);
     background: transparent;
-    border: 1px solid #333;
-    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
     -webkit-tap-highlight-color: transparent;
+    height: 40px;
+    letter-spacing: 0.02em;
 }
 
 #restart-btn:hover {
-    border-color: #e2e2e2;
-    color: #fff;
+    border-color: var(--color-primary);
+    color: var(--color-inverse);
+    background: rgba(209, 208, 197, 0.04);
 }
 
 #restart-btn:active {
     transform: scale(0.97);
 }
 
-/* ── History bar ─────────────────────────────────────────────── */
+#restart-btn:focus-visible {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ── History bar ──────────────────────────────────────────────── */
 #history-bar {
     width: 100%;
     max-width: 900px;
-    padding: 0.5rem 2rem 1.5rem;
+    padding: var(--space-sm) var(--space-xl) var(--space-xl);
     user-select: none;
 }
 
 #history-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: var(--space-sm);
 }
 
 .history-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    background: #181818;
-    border: 1px solid #222;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #666;
+    gap: 0.3rem;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-neutral);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-regular);
+    color: var(--color-muted);
     animation: chipIn 0.2s ease;
+    line-height: var(--lh-tight);
 }
 
 @keyframes chipIn {
@@ -490,49 +538,58 @@ body.error #morse-chars {
 }
 
 .history-chip .chip-char {
-    font-size: 0.85rem;
-    color: #aaa;
+    font-size: var(--fs-body-sm);
+    color: var(--color-secondary);
 }
 
 .history-chip .chip-morse {
-    font-weight: 400;
-    color: #555;
+    font-weight: var(--fw-regular);
+    color: var(--color-tertiary);
     letter-spacing: 0.08em;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
+/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 640px) {
     #top {
-        padding: 1rem 1rem 0.25rem;
-        gap: 0.5rem;
+        padding: var(--space-gutter) var(--space-gutter) var(--space-sm);
+        gap: var(--space-sm);
         flex-wrap: wrap;
     }
 
-    #timer-modes { order: 3; width: auto; margin-left: auto; }
-    .mute-btn { order: 3; font-size: 1rem; }
+    #logo {
+        font-size: var(--fs-body);
+    }
 
-    #stats { gap: 0.75rem; }
+    #timer-modes { order: 3; width: auto; margin-left: auto; }
+    .mute-btn { order: 3; }
+
+    #stats { gap: var(--space-md); }
 
     .stat { min-width: 2.5rem; }
 
-    .stat-value { font-size: 0.9rem; }
+    .stat-value { font-size: var(--fs-body-sm); }
 
     #main {
-        padding: 0.75rem 1rem;
-        gap: 1rem;
+        padding: var(--space-md) var(--space-gutter);
+        gap: var(--space-gutter);
     }
 
-    #current-character { font-size: 3.5rem; }
+    #current-character { font-size: var(--fs-headline-lg); }
 
-    #morse-chars { font-size: 1.5rem; }
+    #morse-chars { font-size: var(--fs-headline-sm); }
 
-    #word-track { font-size: 1.1rem; gap: 0.35rem; }
+    #word-track { font-size: var(--fs-body); gap: 0.35rem; }
 
-    #char-track { font-size: 1rem; }
+    #char-track { font-size: var(--fs-body-sm); }
 
-    #results-grid { gap: 0.5rem 1.5rem; }
+    #results-grid { gap: var(--space-sm) var(--space-gutter); }
 
-    .result-value { font-size: 1.5rem; }
+    #results {
+        gap: var(--space-gutter);
+        padding: var(--space-gutter);
+    }
+
+    .result-value { font-size: var(--fs-headline-md); }
 
     #result-chart-container { height: 130px; }
 
@@ -541,14 +598,11 @@ body.error #morse-chars {
 
 @media (max-width: 400px) {
     #mobile-controls { max-width: 280px; }
-    .morse-btn { font-size: 1.8rem; padding: 0.75rem 0; }
-    #current-character { font-size: 2.8rem; }
-
-    #morse-chars { font-size: 1.2rem; }
-
-    #word-track { font-size: 0.95rem; }
-
-    #char-track { font-size: 0.85rem; }
-
-    .stat-value { font-size: 0.8rem; }
+    .morse-btn { font-size: 1.5rem; padding: var(--space-md) 0; }
+    #current-character { font-size: var(--fs-headline-md); }
+    #morse-chars { font-size: var(--fs-body); }
+    #word-track { font-size: var(--fs-body-sm); }
+    #char-track { font-size: var(--fs-body-sm); }
+    .stat-value { font-size: var(--fs-body-sm); }
+    #top { padding: var(--space-md) var(--space-md) var(--space-xs); }
 }

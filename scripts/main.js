@@ -157,24 +157,35 @@ function unlockAudio() {
   if (S.audioCtx.state === "suspended") S.audioCtx.resume();
 }
 
-function beep(vol, freq, dur) {
+function playTone(freq, dur) {
   if (S.muted) return;
   try {
     unlockAudio();
     if (!S.audioCtx) return;
+    const now = S.audioCtx.currentTime;
     const o = S.audioCtx.createOscillator();
     const g = S.audioCtx.createGain();
     o.connect(g); g.connect(S.audioCtx.destination);
     o.frequency.value = freq;
-    o.type = "square";
-    g.gain.value = vol * 0.01;
-    o.start(S.audioCtx.currentTime);
-    o.stop(S.audioCtx.currentTime + dur * 0.001);
+    o.type = "sine";
+
+    // Gentle fade-in and fade-out for a natural, calm attack/release
+    const fadeIn = 0.008;
+    const fadeOut = 0.015;
+    const totalDur = dur * 0.001;
+
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(0.35, now + fadeIn);
+    g.gain.setValueAtTime(0.35, now + totalDur - fadeOut);
+    g.gain.linearRampToValueAtTime(0, now + totalDur);
+
+    o.start(now);
+    o.stop(now + totalDur);
   } catch {}
 }
 
-function playDit() { beep(50, 650, 90); }
-function playDah() { beep(50, 650, 280); }
+function playDit() { playTone(660, 80); }
+function playDah() { playTone(660, 260); }
 
 /* ── Session generator ───────────────────────────────────────────
  *  Picks words to form a "sentence-like" sequence. Mixes lengths
@@ -382,9 +393,9 @@ function handleInput(symbol) {
     return;
   }
 
-  // Wrong → error buzz, reset buffer after a short delay
+  // Wrong → soft error tone, reset buffer after a short delay
   S.mistakes++;
-  beep(40, 180, 250);
+  playTone(220, 200);
   DOM.body.classList.add("error");
   S._errorPending = true;
   setTimeout(() => {
